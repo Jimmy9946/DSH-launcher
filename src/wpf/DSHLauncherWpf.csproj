@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>DSHLauncher</AssemblyName>
+    <RootNamespace>DSHLauncher</RootNamespace>
+    <Version>1.1.0</Version>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
+
+  <!-- 复用 WinForms 版的共享核心模块（零改动） -->
+  <ItemGroup>
+    <Compile Include="../csharp/Settings.cs" Link="Shared/Settings.cs" />
+    <Compile Include="../csharp/Log.cs" Link="Shared/Log.cs" />
+    <Compile Include="../csharp/Core/*.cs" Link="Shared/Core/%(Filename)%(Extension)" />
+  </ItemGroup>
+
+</Project>
