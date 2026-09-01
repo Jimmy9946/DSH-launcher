@@ -4,6 +4,9 @@
              StartupUri="MainWindow.xaml">
     <Application.Resources>
 
+        <!-- ===== 嵌入字体：鸿蒙 Sans SC（exe 自带，任何电脑一致） ===== -->
+        <FontFamily x:Key="FontMain">pack://application:,,,/Fonts/#HarmonyOS Sans SC</FontFamily>
+
         <!-- ===== PCL 风格调色板：浅蓝背景 + 白色卡片 + 蓝色点缀 ===== -->
         <Color x:Key="BgDark">#D9EDFA</Color>
         <Color x:Key="BgPanel">#EAF6FE</Color>

@@ -7,7 +7,7 @@
         WindowStyle="None" ResizeMode="CanResize"
         WindowStartupLocation="CenterScreen"
         Background="{StaticResource BgDarkBrush}"
-        FontFamily="Microsoft YaHei UI"
+        FontFamily="{StaticResource FontMain}"
         UseLayoutRounding="True">
 
     <!-- 无边框窗口标准配置：消除顶部/边缘缝隙，标题栏完整覆盖 -->
@@ -181,7 +181,8 @@
                             <ItemsControl x:Name="LogList" ItemsSource="{Binding Logs}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding Text}" FontFamily="Cascadia Mono, Consolas"
+                                        <TextBlock Text="{Binding Text}"
+                                                   FontFamily="Cascadia Mono, Consolas, pack://application:,,,/Fonts/#HarmonyOS Sans SC"
                                                    FontSize="11.5" Foreground="#4A5A6A" TextWrapping="Wrap"
                                                    Margin="0,0,0,3"/>
                                     </DataTemplate>

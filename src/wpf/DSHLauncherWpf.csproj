@@ -9,9 +9,14 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>DSHLauncher</AssemblyName>
     <RootNamespace>DSHLauncher</RootNamespace>
-    <Version>1.1.0</Version>
+    <Version>1.2.0</Version>
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
+
+  <!-- 嵌入鸿蒙 Sans SC 字体：任何电脑打开 exe 都用该字体，无需安装 -->
+  <ItemGroup>
+    <Resource Include="Fonts\*.ttf" />
+  </ItemGroup>
 
   <!-- 复用 WinForms 版的共享核心模块（零改动） -->
   <ItemGroup>
