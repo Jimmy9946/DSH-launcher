@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -49,7 +49,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
 
     public ObservableCollection<LogItem> Logs { get; } = [];
 
-    public string AppVersion => $"v1.2  ·  Node {_s.NodeVersion}";
+    public string AppVersion => $"v1.4.0  ·  Node {_s.NodeVersion}";
 
     private string _statusText = "正在检查环境...";
     public string StatusText
