@@ -4,7 +4,7 @@ chcp 936 >nul 2>&1
 title DSH 一键部署启动器
 
 rem ============================================================
-rem  DSH (DeepSeek Harness) 一键部署启动器 v1.0
+rem  DSH 一键部署启动器 v1.0
 rem  - 自动检测/下载 Node 免安装版(官方源, 失败自动切国内镜像)
 rem  - 自动安装 DSH (@deepseek-ai/dsh)
 rem  - 启动 DSH Web 并打开浏览器
@@ -42,7 +42,7 @@ set "DSH_CMD="
 set "REGISTRY="
 
 echo ================================================
-echo    DSH (DeepSeek Harness) 一键部署启动器
+echo    DSH 一键部署启动器
 echo    版本: v1.0   目标 Node: %NODE_VERSION%
 echo ================================================
 echo.

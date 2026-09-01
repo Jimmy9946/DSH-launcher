@@ -1,18 +1,28 @@
-# DSH One-Click Launcher
+﻿# DSH One-Click Launcher
 
-A Windows launcher that deploys **DeepSeek Harness (DSH)** with one click:
-downloads a portable Node.js runtime, installs `@deepseek-ai/dsh`, starts the
-Web UI, and opens the browser — no admin rights, no system pollution.
+An **unofficial** Windows launcher that sets up DeepSeek Harness (DSH) locally:
+it downloads a portable Node.js runtime, installs the official
+`@deepseek-ai/dsh` npm package, starts the Web UI, and opens your browser.
+Self-contained — no administrator privileges required, nothing is written
+outside the launcher folder (delete the folder to uninstall).
+
+> **Disclaimer:** This is an independent community project. It is **not
+> affiliated with, endorsed by, or sponsored by** DeepSeek or the DeepSeek
+> Harness project. Product names are trademarks of their respective owners and
+> are used here only to describe compatibility. See
+> [Third-party notices](#third-party-notices) for bundled third-party material.
 
 ## Features
 
-- **WPF GUI (PCL-style skin)**: borderless dark-blue theme, step list with
-  per-step states, slim progress bar, live log panel, port & mirror settings.
-  Deployment starts automatically when the window opens.
+- **WPF GUI**: borderless light theme (blue-gradient title bar, glass cards,
+  ambient glow), per-step status list, slim progress bar, live log panel, port
+  and mirror settings, auto port detection, Windows 11 native rounded corners,
+  screen-adaptive window size, and an embedded HarmonyOS Sans SC font so the UI
+  looks identical on any PC without installing anything.
 - **Headless mode** (WinForms build): `DSHLauncher.exe --auto [--port=3098]
   [--mirror] [--node-version=24.20.0]` — exit code 0 means success.
 - **Latest-version lookup**: Node LTS & DSH versions from official sources,
-  falling back to Chinese mirrors (npmmirror) automatically.
+  falling back to public mirrors automatically.
 - **8-thread chunked download** over HTTP Range when the server supports it,
   single-stream otherwise.
 - **Self-contained**: portable Node lives under `runtime\` next to the exe;
@@ -24,7 +34,7 @@ Web UI, and opens the browser — no admin rights, no system pollution.
 
 ```
 src/
-  wpf/       WPF skin launcher (current, v1.1)
+  wpf/       WPF GUI launcher (current, v1.4)
   csharp/    WinForms launcher + shared core (v1.0) — the Core/ modules are
              shared by both UIs
   *.bat      Command-line launcher (v1.0)
@@ -64,9 +74,18 @@ Note: on Linux hosts run the SDK with `DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1`
 | Variable | Purpose | Default |
 |---|---|---|
 | `DSH_LAUNCHER_NODE_VERSION` | Pin Node version | latest LTS from network |
-| `DSH_LAUNCHER_FORCE_MIRROR` | `1` = force Chinese mirrors | official first |
+| `DSH_LAUNCHER_FORCE_MIRROR` | `1` = force mirror sources | official first |
 | `DSH_LAUNCHER_PORT` | Web port (not 0) | `3080` |
 | `DSH_HOME` | DSH data directory | `%USERPROFILE%\.dsh` |
+
+## Third-party notices
+
+- **DeepSeek Harness (DSH)** — installed from the official npm package
+  `@deepseek-ai/dsh`; subject to its own license terms.
+- **HarmonyOS Sans SC** — © Huawei Technologies Co., Ltd. Used under the
+  [HarmonyOS Sans Font License](src/wpf/Fonts/LICENSE-SC.txt), which permits
+  free commercial use, embedding and redistribution; see the license text for
+  the full terms.
 
 ## License
 
