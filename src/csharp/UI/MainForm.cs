@@ -123,27 +123,20 @@ public sealed class MainForm : Form
         {
             var name = step switch
             {
-                DeployStep.DetectNode => "检测 Node",
-                DeployStep.DownloadNode => "下载 Node",
-                DeployStep.ExtractNode => "解压 Node",
+                DeployStep.DetectEnv => "检测环境",
+                DeployStep.DownloadNode => "下载组件",
+                DeployStep.ExtractNode => "解压组件",
                 DeployStep.InstallDsh => "安装 DSH",
-                DeployStep.StartWeb => "启动服务",
-                DeployStep.WaitReady => "等待就绪",
-                _ => "完成",
+                _ => "就绪",
             };
             SetStatus(name);
         };
 
-        AppendLog($"===== 开始部署 (端口 {_s.Port}) =====");
-        var ok = await runner.RunAsync(_cts.Token);
+        AppendLog($"===== 环境检查 (端口 {_s.Port}) =====");
+        var ok = await runner.PrepareAsync(_cts.Token);
         SetProgress(ok ? 100 : 0);
-        SetStatus(ok ? "部署完成" : "部署失败");
-        AppendLog(ok ? "===== 部署完成 =====" : "===== 部署失败 =====");
-        if (ok)
-        {
-            WebServer.OpenBrowser(_s.Url);
-            AppendLog($"已打开浏览器: {_s.Url}");
-        }
+        SetStatus(ok ? "环境就绪, 请点击启动" : "部署失败");
+        AppendLog(ok ? "===== 环境就绪 =====" : "===== 部署失败 =====");
         _running = false;
         _deployBtn.Enabled = true;
         _stopBtn.Enabled = true;
@@ -152,28 +145,21 @@ public sealed class MainForm : Form
     private void StartOnlyAsync()
     {
         if (_running) return;
+        _running = true;
+        _stopBtn.Enabled = false;
         _s.Port = (int)_port.Value;
         _s.ForceMirror = _mirrorBox.Checked;
         _s.Save();
-        if (!WebServer.IsPortOpen(_s.Port))
+        AppendLog($"启动服务 (端口 {_s.Port})...");
+        var runner = new DeployRunner(_s, _s.ForceMirror);
+        runner.LogLine += AppendLog;
+        _ = Task.Run(async () =>
         {
-            Directory.CreateDirectory(_s.EffectiveWorkspace);
-            WebServer.Launch(_s);
-            AppendLog($"服务启动中 (端口 {_s.Port})...");
-            _ = Task.Run(async () =>
-            {
-                if (await WebServer.WaitReadyAsync(_s.Port, TimeSpan.FromMinutes(6)).ConfigureAwait(false))
-                {
-                    AppendLog($"服务已就绪: {_s.Url}");
-                    WebServer.OpenBrowser(_s.Url);
-                }
-                else AppendLog("等待服务超时");
-            });
-        }
-        else
-        {
-            AppendLog("服务已在运行, 直接打开页面");
-            WebServer.OpenBrowser(_s.Url);
-        }
+            var ok = await runner.StartWebAsync(_cts?.Token ?? default);
+            AppendLog(ok ? $"服务已就绪: {_s.Url}" : "启动失败");
+            if (ok) WebServer.OpenBrowser(_s.Url);
+            _running = false;
+            _stopBtn.Enabled = true;
+        });
     }
 }
