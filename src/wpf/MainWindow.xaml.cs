@@ -1,5 +1,7 @@
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Interop;
 using DSHLauncher.ViewModels;
 
 namespace DSHLauncher;
@@ -10,6 +12,10 @@ public partial class MainWindow : Window
 
     public MainWindow()
     {
+        // 初始尺寸按屏幕工作区自适应（WPF DIP + PerMonitorV2 处理高 DPI 缩放）
+        var work = SystemParameters.WorkArea;
+        Width = Math.Min(900, Math.Max(760, work.Width - 80));
+        Height = Math.Min(620, Math.Max(520, work.Height - 80));
         InitializeComponent();
         DataContext = _vm;
         Log.Init(System.IO.Path.Combine(Settings.AppDir, "logs", "launcher.log"));
@@ -23,6 +29,22 @@ public partial class MainWindow : Window
         // v1.2 流程：打开窗口自动「检查环境 + 按需下载」，启动由用户手动触发
         Loaded += async (_, _) => await _vm.PrepareAsync();
     }
+
+    /// <summary>Windows 11 原生圆角（与 EDGE 一致）；Windows 10 自动忽略。</summary>
+    protected override void OnSourceInitialized(EventArgs e)
+    {
+        base.OnSourceInitialized(e);
+        try
+        {
+            var hwnd = new WindowInteropHelper(this).Handle;
+            int cornerPref = 2; // DWMWCP_ROUND
+            DwmSetWindowAttribute(hwnd, 33, ref cornerPref, sizeof(int));
+        }
+        catch { }
+    }
+
+    [DllImport("dwmapi.dll")]
+    private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
 
     private void TitleBar_MouseDown(object sender, MouseButtonEventArgs e)
     {
