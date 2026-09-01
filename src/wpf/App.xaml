@@ -4,17 +4,17 @@
              StartupUri="MainWindow.xaml">
     <Application.Resources>
 
-        <!-- ===== PCL 皮肤调色板：深蓝夜空 + 青色点缀 ===== -->
-        <Color x:Key="BgDark">#0A1626</Color>
-        <Color x:Key="BgPanel">#10233B</Color>
-        <Color x:Key="BgCard">#15304E</Color>
-        <Color x:Key="Accent">#00B4D8</Color>
-        <Color x:Key="AccentBright">#48CAE4</Color>
-        <Color x:Key="AccentGlow">#7FE3F5</Color>
-        <Color x:Key="OkGreen">#2ECC71</Color>
-        <Color x:Key="FailRed">#E74C3C</Color>
-        <Color x:Key="TextMain">#E8F4FC</Color>
-        <Color x:Key="TextDim">#7FA8C4</Color>
+        <!-- ===== PCL 风格调色板：浅蓝背景 + 白色卡片 + 蓝色点缀 ===== -->
+        <Color x:Key="BgDark">#D9EDFA</Color>
+        <Color x:Key="BgPanel">#EAF6FE</Color>
+        <Color x:Key="BgCard">#FFFFFF</Color>
+        <Color x:Key="Accent">#1E88E5</Color>
+        <Color x:Key="AccentBright">#42A5F5</Color>
+        <Color x:Key="AccentGlow">#90CAF9</Color>
+        <Color x:Key="OkGreen">#43A047</Color>
+        <Color x:Key="FailRed">#E53935</Color>
+        <Color x:Key="TextMain">#1B3A5C</Color>
+        <Color x:Key="TextDim">#78909C</Color>
 
         <SolidColorBrush x:Key="BgDarkBrush" Color="{StaticResource BgDark}"/>
         <SolidColorBrush x:Key="BgPanelBrush" Color="{StaticResource BgPanel}"/>
@@ -27,18 +27,18 @@
         <SolidColorBrush x:Key="TextMainBrush" Color="{StaticResource TextMain}"/>
         <SolidColorBrush x:Key="TextDimBrush" Color="{StaticResource TextDim}"/>
 
-        <!-- 卡片 -->
+        <!-- 卡片（PCL 白色圆角） -->
         <Style x:Key="Card" TargetType="Border">
             <Setter Property="Background" Value="{StaticResource BgCardBrush}"/>
-            <Setter Property="CornerRadius" Value="12"/>
-            <Setter Property="BorderBrush" Value="#1E4A6E"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="BorderBrush" Value="#D8E9F8"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="16"/>
         </Style>
 
-        <!-- 主按钮（青色渐变，大） -->
+        <!-- 主按钮（PCL 蓝渐变，白字） -->
         <Style x:Key="PrimaryButton" TargetType="Button">
-            <Setter Property="Foreground" Value="#04121E"/>
+            <Setter Property="Foreground" Value="White"/>
             <Setter Property="FontSize" Value="15"/>
             <Setter Property="FontWeight" Value="Bold"/>
             <Setter Property="Cursor" Value="Hand"/>
@@ -48,21 +48,21 @@
                         <Border x:Name="Bd" CornerRadius="8" Padding="18,9">
                             <Border.Background>
                                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                    <GradientStop Color="#48CAE4" Offset="0"/>
-                                    <GradientStop Color="#00B4D8" Offset="1"/>
+                                    <GradientStop Color="#42A5F5" Offset="0"/>
+                                    <GradientStop Color="#1E88E5" Offset="1"/>
                                 </LinearGradientBrush>
                             </Border.Background>
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Opacity" Value="0.88"/>
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.9"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="Bd" Property="Opacity" Value="0.72"/>
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.75"/>
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="Bd" Property="Opacity" Value="0.45"/>
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.5"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -70,24 +70,24 @@
             </Setter>
         </Style>
 
-        <!-- 幽灵按钮（描边） -->
+        <!-- 幽灵按钮（白底蓝边） -->
         <Style x:Key="GhostButton" TargetType="Button">
-            <Setter Property="Foreground" Value="{StaticResource AccentBrightBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border x:Name="Bd" CornerRadius="8" Padding="16,8"
-                                Background="#0F2A44" BorderBrush="#2A6B94" BorderThickness="1">
+                                Background="#FFFFFF" BorderBrush="#C5DEF5" BorderThickness="1">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#163A5C"/>
+                                <Setter TargetName="Bd" Property="Background" Value="#EDF6FE"/>
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="Bd" Property="Opacity" Value="0.45"/>
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.5"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -95,9 +95,9 @@
             </Setter>
         </Style>
 
-        <!-- 标题栏按钮 -->
+        <!-- 标题栏按钮（蓝色标题栏上白字） -->
         <Style x:Key="TitleBtn" TargetType="Button">
-            <Setter Property="Foreground" Value="{StaticResource TextDimBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Width" Value="44"/>
             <Setter Property="Height" Value="36"/>
@@ -111,8 +111,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#1E4A6E"/>
-                                <Setter Property="Foreground" Value="{StaticResource TextMainBrush}"/>
+                                <Setter TargetName="Bd" Property="Background" Value="#33FFFFFF"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -120,15 +119,15 @@
             </Setter>
         </Style>
 
-        <!-- 输入框 -->
+        <!-- 输入框（白底蓝边，PCL 风格） -->
         <Style x:Key="DarkTextBox" TargetType="TextBox">
-            <Setter Property="Foreground" Value="{StaticResource TextMainBrush}"/>
-            <Setter Property="Background" Value="#0C1D30"/>
-            <Setter Property="BorderBrush" Value="#2A6B94"/>
+            <Setter Property="Foreground" Value="#26343F"/>
+            <Setter Property="Background" Value="#FFFFFF"/>
+            <Setter Property="BorderBrush" Value="#BBDEFB"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="8,5"/>
             <Setter Property="FontSize" Value="13"/>
-            <Setter Property="CaretBrush" Value="{StaticResource AccentBrightBrush}"/>
+            <Setter Property="CaretBrush" Value="{StaticResource AccentBrush}"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="TextBox">
@@ -146,10 +145,10 @@
             </Setter>
         </Style>
 
-        <!-- 细进度条（顶部装饰） -->
+        <!-- 细进度条（浅轨道 + 蓝色指示） -->
         <Style x:Key="SlimProgress" TargetType="ProgressBar">
             <Setter Property="Height" Value="4"/>
-            <Setter Property="Background" Value="#1E4A6E"/>
+            <Setter Property="Background" Value="#DCEBF9"/>
             <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
             <Setter Property="Template">
                 <Setter.Value>
@@ -169,8 +168,8 @@
             <Setter Property="Width" Value="14"/>
             <Setter Property="Height" Value="14"/>
             <Setter Property="StrokeThickness" Value="2"/>
-            <Setter Property="Stroke" Value="{StaticResource TextDimBrush}"/>
-            <Setter Property="Fill" Value="#0C1D30"/>
+            <Setter Property="Stroke" Value="#B0C9DE"/>
+            <Setter Property="Fill" Value="#FFFFFF"/>
         </Style>
 
     </Application.Resources>

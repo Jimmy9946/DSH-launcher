@@ -47,7 +47,9 @@ public static class Program
             if (e.Total > 0)
                 Console.Write($"\r下载: {e.Percent:F1}% ({e.Received / 1048576.0:F1}/{e.Total / 1048576.0:F1} MB)   ");
         };
-        var ok = await runner.RunAsync();
+        // v1.2 流程：先准备环境（检查/下载/安装），再启动服务
+        var ok = await runner.PrepareAsync();
+        if (ok) ok = await runner.StartWebAsync();
         Console.WriteLine();
         if (ok)
         {

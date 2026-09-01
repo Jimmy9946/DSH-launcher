@@ -1,33 +1,32 @@
 using System;
 using System.IO;
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.IO.Compression;
-using System.Text;
 
 namespace DSHLauncher.Core;
 
 public enum DeployStep
 {
-    DetectNode,
+    DetectEnv,
     DownloadNode,
     ExtractNode,
     InstallDsh,
-    StartWeb,
-    WaitReady,
-    Done,
+    Ready,
 }
 
 /// <summary>
-/// 部署编排：查询最新版本 → 检测/下载/解压 Node → 安装 DSH → 启动 Web → 等待就绪。
-/// 事件驱动进度（GUI 订阅），核心与界面完全解耦。
+/// 部署编排（v1.2）：先检查环境（系统 Node 优先复用），按需下载/安装，
+/// 然后由用户手动启动服务。事件驱动进度（GUI 订阅），核心与界面完全解耦。
 /// </summary>
 public sealed class DeployRunner
 {
     private readonly Settings _s;
     public bool Mirror { get; set; }
     public bool AutoUpdateVersion { get; set; } = true;
+
+    /// <summary>Prepare 后选定的 Node 环境（system 或 builtin）。</summary>
+    public NodeEnv? CurrentNode { get; private set; }
 
     public event Action<string>? LogLine;
     public event Action<DeployStep>? StepChanged;
@@ -39,9 +38,10 @@ public sealed class DeployRunner
         Mirror = mirror;
     }
 
-    public async Task<bool> RunAsync(CancellationToken ct = default)
+    /// <summary>第一步：检查环境 + 按需下载/安装（不启动服务）。</summary>
+    public async Task<bool> PrepareAsync(CancellationToken ct = default)
     {
-        // 0. 联网查询最新版本
+        // 0. 联网查询最新版本（仅用于下载时的版本选择与提示）
         if (AutoUpdateVersion)
         {
             LogLine?.Invoke("正在查询最新版本...");
@@ -58,16 +58,23 @@ public sealed class DeployRunner
             }
         }
 
-        // 1. 检测 Node（内置 runtime）
-        StepChanged?.Invoke(DeployStep.DetectNode);
-        if (File.Exists(_s.NodeExe))
+        // 1. 环境检测：系统 Node 优先，其次内置，最后下载
+        StepChanged?.Invoke(DeployStep.DetectEnv);
+        var sys = NodeEnv.FindSystemNode();
+        if (sys != null)
         {
-            var v = await GetNodeVersionAsync(_s.NodeExe, ct).ConfigureAwait(false);
-            LogLine?.Invoke($"使用内置 Node: {v}");
+            NodeEnv.TryGetVersion(sys.NodeExe, out var major);
+            LogLine?.Invoke($"检测到系统 Node v{major}：直接复用，无需下载");
+            CurrentNode = sys;
+        }
+        else if (File.Exists(_s.NodeExe) && NodeEnv.TryGetVersion(_s.NodeExe, out var builtinMajor) && builtinMajor >= 22)
+        {
+            LogLine?.Invoke($"使用内置 Node v{builtinMajor}");
+            CurrentNode = NodeEnv.FromBuiltin(_s.NodeExe);
         }
         else
         {
-            // 2. 下载（首选通道失败自动切另一通道）
+            LogLine?.Invoke("未检测到可用 Node（需要 v22 以上），下载内置版本...");
             StepChanged?.Invoke(DeployStep.DownloadNode);
             var zip = Path.Combine(_s.RuntimeDir, $"node-v{_s.NodeVersion}-win-x64.zip");
             var prog = new Progress<DownloadProgressEventArgs>(e => DownloadProgress?.Invoke(e));
@@ -91,7 +98,6 @@ public sealed class DeployRunner
             }
             if (!ok) return false;
 
-            // 3. 解压
             StepChanged?.Invoke(DeployStep.ExtractNode);
             LogLine?.Invoke("解压 Node...");
             Directory.CreateDirectory(_s.RuntimeDir);
@@ -103,24 +109,25 @@ public sealed class DeployRunner
                 return false;
             }
             LogLine?.Invoke($"Node {_s.NodeVersion} 就绪");
+            CurrentNode = NodeEnv.FromBuiltin(_s.NodeExe);
         }
 
-        // 4. 安装 / 检查 DSH
+        // 2. DSH：统一安装到启动器目录 runtime\npm-global（免管理员）
         StepChanged?.Invoke(DeployStep.InstallDsh);
-        if (File.Exists(_s.DshBinJs))
+        if (File.Exists(_s.DshBinJsGlobal))
         {
             LogLine?.Invoke("DSH 已安装, 跳过");
         }
         else
         {
             LogLine?.Invoke($"安装 DSH ({(Mirror ? "镜像" : "官方")}源)...");
-            var code = await DshInstaller.InstallAsync(_s, Mirror, LogLine, ct).ConfigureAwait(false);
+            var code = await DshInstaller.InstallAsync(_s, CurrentNode, Mirror, LogLine, ct).ConfigureAwait(false);
             if (code != 0 && !Mirror)
             {
                 LogLine?.Invoke("官方源安装失败, 切换国内镜像重试...");
-                code = await DshInstaller.InstallAsync(_s, true, LogLine, ct).ConfigureAwait(false);
+                code = await DshInstaller.InstallAsync(_s, CurrentNode, true, LogLine, ct).ConfigureAwait(false);
             }
-            if (code != 0 || !File.Exists(_s.DshBinJs))
+            if (code != 0 || !File.Exists(_s.DshBinJsGlobal))
             {
                 LogLine?.Invoke("DSH 安装失败");
                 return false;
@@ -128,8 +135,25 @@ public sealed class DeployRunner
             LogLine?.Invoke("DSH 安装完成");
         }
 
-        // 5. 启动 + 等待就绪（进程早退自动重启，最多 3 次，防御首启瞬态失败）
-        StepChanged?.Invoke(DeployStep.StartWeb);
+        StepChanged?.Invoke(DeployStep.Ready);
+        return true;
+    }
+
+    /// <summary>第二步：启动 DSH Web 并等待就绪（用户手动触发）。</summary>
+    public async Task<bool> StartWebAsync(CancellationToken ct = default)
+    {
+        if (!File.Exists(_s.DshBinJsGlobal))
+        {
+            LogLine?.Invoke("环境未就绪，请先完成部署");
+            return false;
+        }
+        var node = NodeEnv.FindSystemNode() ?? (File.Exists(_s.NodeExe) ? NodeEnv.FromBuiltin(_s.NodeExe) : null);
+        if (node == null)
+        {
+            LogLine?.Invoke("找不到可用的 Node，请先完成部署");
+            return false;
+        }
+
         Directory.CreateDirectory(_s.EffectiveWorkspace);
         var deadline = DateTime.UtcNow + TimeSpan.FromMinutes(6);
         System.Diagnostics.Process? proc = null;
@@ -143,7 +167,7 @@ public sealed class DeployRunner
                 restartCount++;
                 if (proc != null) LogLine?.Invoke("DSH 进程退出, 正在重新启动...");
                 else LogLine?.Invoke($"启动 DSH Web (端口 {_s.Port})...");
-                proc = WebServer.Launch(_s);
+                proc = WebServer.Launch(_s, node);
                 if (proc == null) LogLine?.Invoke("启动 DSH 失败");
             }
             await Task.Delay(2000, ct).ConfigureAwait(false);
@@ -152,29 +176,7 @@ public sealed class DeployRunner
         return false;
 
         ready:
-        StepChanged?.Invoke(DeployStep.WaitReady);
         LogLine?.Invoke($"服务已就绪: {_s.Url}");
-        StepChanged?.Invoke(DeployStep.Done);
         return true;
-    }
-
-    private static async Task<string> GetNodeVersionAsync(string nodeExe, CancellationToken ct)
-    {
-        try
-        {
-            var psi = new System.Diagnostics.ProcessStartInfo(nodeExe)
-            {
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-            };
-            psi.ArgumentList.Add("--version");
-            using var p = System.Diagnostics.Process.Start(psi)!;
-            var outp = p.StandardOutput.ReadToEndAsync(ct);
-            var err = p.StandardError.ReadToEndAsync(ct);
-            await p.WaitForExitAsync(ct).ConfigureAwait(false);
-            return (await outp.ConfigureAwait(false)).Trim().TrimStart('v');
-        }
-        catch { return "?"; }
     }
 }

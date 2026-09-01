@@ -1,12 +1,12 @@
 using System;
 using System.Diagnostics;
-using System.Threading.Tasks;
-using System.Diagnostics;
 using System.Net.Sockets;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace DSHLauncher.Core;
 
-/// <summary>启动 dsh web 服务、等待端口就绪、打开浏览器。</summary>
+/// <summary>用选定的 Node 启动 dsh web 服务、等待端口就绪、打开浏览器。</summary>
 public static class WebServer
 {
     public static bool IsPortOpen(int port)
@@ -31,14 +31,14 @@ public static class WebServer
         return IsPortOpen(port);
     }
 
-    public static Process? Launch(Settings s)
+    public static Process? Launch(Settings s, NodeEnv node)
     {
-        var psi = new ProcessStartInfo(s.NodeExe)
+        var psi = new ProcessStartInfo(node.NodeExe)
         {
             UseShellExecute = false,
             WorkingDirectory = s.EffectiveWorkspace,
         };
-        psi.ArgumentList.Add(s.DshBinJs);
+        psi.ArgumentList.Add(s.DshBinJsGlobal);
         psi.ArgumentList.Add("web");
         psi.ArgumentList.Add("--port");
         psi.ArgumentList.Add(s.Port.ToString());

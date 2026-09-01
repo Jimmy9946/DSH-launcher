@@ -20,8 +20,8 @@ public partial class MainWindow : Window
         Log.Line += line => Dispatcher.BeginInvoke(() => _vm.Logs.Add(new LogItem($"[{DateTime.Now:HH:mm:ss}] {line}")));
         Log.Info("GUI started");
 
-        // PCL 式体验：打开窗口即自动部署（已就绪则直接进入启动流程）
-        Loaded += async (_, _) => await _vm.DeployAsync();
+        // v1.2 流程：打开窗口自动「检查环境 + 按需下载」，启动由用户手动触发
+        Loaded += async (_, _) => await _vm.PrepareAsync();
     }
 
     private void TitleBar_MouseDown(object sender, MouseButtonEventArgs e)
@@ -40,9 +40,15 @@ public partial class MainWindow : Window
         Close();
     }
 
-    private async void Deploy_Click(object sender, RoutedEventArgs e) => await _vm.DeployAsync();
+    private async void Deploy_Click(object sender, RoutedEventArgs e)
+    {
+        if (_vm.IsReady) await _vm.StartAsync();
+        else await _vm.PrepareAsync();
+    }
 
-    private void StartOnly_Click(object sender, RoutedEventArgs e) => _vm.StartOnly();
+    private async void StartOnly_Click(object sender, RoutedEventArgs e) => await _vm.StartAsync();
+
+    private async void AutoPickPort_Click(object sender, RoutedEventArgs e) => await _vm.AutoPickPortAsync();
 
     private void OpenData_Click(object sender, RoutedEventArgs e) => _vm.OpenDataDir();
 
