@@ -10,6 +10,8 @@
     <AssemblyName>DSHLauncher</AssemblyName>
     <RootNamespace>DSHLauncher</RootNamespace>
     <Version>1.4.0</Version>
+    <Company>Jimmy</Company>
+    <Copyright>Copyright (c) 2026 Jimmy</Copyright>
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 

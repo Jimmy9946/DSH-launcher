@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -10,6 +10,8 @@
     <AssemblyName>DSHLauncher</AssemblyName>
     <RootNamespace>DSHLauncher</RootNamespace>
     <Version>1.0.0</Version>
+    <Company>Jimmy</Company>
+    <Copyright>Copyright (c) 2026 Jimmy</Copyright>
     <InvariantGlobalization>true</InvariantGlobalization>
   </PropertyGroup>
 
